@@ -2,11 +2,26 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Post;
 
 Route::get('/', function () {
-    return view('welcome');
+
+    Yaml
+
+    //$posts = Post::all();
+
+    //dd($posts[0]->getContents());
+
+    //return view('posts', [
+    //    'posts' => $posts
+    //]);
 });
 
+Route::get('post/{post}', function ($slug) {
+    return view('post', [
+               'post' => Post::find($slug)
+            ]);
+});
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
