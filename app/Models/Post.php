@@ -2,28 +2,51 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\File; // Corrigeer 'Illumintate' naar 'Illuminate'
-use Illuminate\Database\Eloquent\ModelNotFoundException; // Corrigeer 'Illumintate' naar 'Illuminate'
+use Illuminate\Support\Facades\File; // Corrigeer 'Illuminate' naar 'Illuminate'
+use Illuminate\Database\Eloquent\ModelNotFoundException; // Corrigeer 'Illuminate' naar 'Illuminate'
+use Spatie\YamlFrontMatter\YamlFrontMatter;
 
 class Post
 {
-    public static function all(){
-        $files = File::files(resource_path("posts/"));
+    public $title;
 
-        return array_map(fn($file) => $file ->getContents(), $files);
+    public $excerpt;
+
+    public $date;
+
+    public $body;
+
+    public $slug;
+
+    public function __construct($title, $excerpt, $date, $body, $slug){
+        {
+            $this->title = $title;
+            $this->excerpt = $excerpt;
+            $this->date = $date;
+            $this->body = $body;
+            $this->slug = $slug;
+        }
     }
 
-    public static function find($slug){
-        // Controleer of het bestand bestaat
-        if (!file_exists($path = resource_path("posts/{$slug}.html"))){
-            // Gooi een ModelNotFoundException als het bestand niet gevonden wordt
-            throw new ModelNotFoundException();
-        }
+    public static function all()
+    {
+        return cache()->rememberForever('posts.all', function(){
 
-        // Gebruik caching om de inhoud van het bestand op te slaan
-        return cache()->remember("posts.{$slug}", 1200, function() use ($path) {
-            return file_get_contents($path); // Sluit de callback-functie hier correct af
-        }); // Sluit de cache()->remember() methode correct af
+        return collect(File::files(resource_path("posts")))
+             ->map(fn($file) => YamlFrontMatter::parseFile($file))
+             ->map(fn($document) => new Post(
+                    $document->title,     // Toegang tot de titel
+                    $document->excerpt,   // Toegang tot de samenvatting
+                    $document->date,      // Toegang tot de datum
+                    $document->body(),       // Toegang tot de inhoud/body
+                    $document->slug
+             ))
+             ->sortByDesc('date');
+    });
+    }
+
+    public static function find($slug) {
+        return static::all()->firstWhere('slug', $slug);
     }
 }
 

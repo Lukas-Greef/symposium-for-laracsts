@@ -12,11 +12,18 @@
 </head>
 
 <body>
-    <?php foreach ($posts as $post) : ?>
-        <div class="article">
-            <h1><a href="/post"></a></h1>
-            <?= $post;?>
-        </div>
-    <?php endforeach; ?>
+    @foreach ($posts as $post)
+            <div class="article">
+                <h1>
+                    <a href="/posts/{{ $post->slug}}">
+                        {{ $post->title }}
+                    </a>
+                </h1>
+            </div>
+            <div>
+                {{ $post->excerpt }}
+            </div>
+        @endforeach
 </body>
 </html>
+
