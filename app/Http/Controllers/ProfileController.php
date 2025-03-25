@@ -18,17 +18,17 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
-        ]);
-    }
+       ]);
+   }
 
     /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
+   {
         $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
+       if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
@@ -37,16 +37,17 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
+
     /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
-    {
+   {
         $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+           'password' => ['required', 'current_password'],
         ]);
 
-        $user = $request->user();
+       $user = $request->user();
 
         Auth::logout();
 

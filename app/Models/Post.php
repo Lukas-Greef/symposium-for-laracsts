@@ -1,52 +1,56 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Support\Facades\File; // Corrigeer 'Illuminate' naar 'Illuminate'
-use Illuminate\Database\Eloquent\ModelNotFoundException; // Corrigeer 'Illuminate' naar 'Illuminate'
-use Spatie\YamlFrontMatter\YamlFrontMatter;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Comment;
 
-class Post
+class Post extends Model
 {
-    public $title;
+    use HasFactory;
 
-    public $excerpt;
 
-    public $date;
+    protected $with = ['category', 'author'];
 
-    public $body;
-
-    public $slug;
-
-    public function __construct($title, $excerpt, $date, $body, $slug){
-        {
-            $this->title = $title;
-            $this->excerpt = $excerpt;
-            $this->date = $date;
-            $this->body = $body;
-            $this->slug = $slug;
-        }
-    }
-
-    public static function all()
+    public function scopeFilter($query, $filters)
     {
-        return cache()->rememberForever('posts.all', function(){
+        $query->when($filters['search'] ?? false, fn ($query, $search)=>
+            $query->where(fn($query) =>
+                $query->where('title', 'like', '%' .  $search. '%')
+                ->orWhere('body', 'like', '%' .  $search . '%')
+            )
+        );
 
-        return collect(File::files(resource_path("posts")))
-             ->map(fn($file) => YamlFrontMatter::parseFile($file))
-             ->map(fn($document) => new Post(
-                    $document->title,     // Toegang tot de titel
-                    $document->excerpt,   // Toegang tot de samenvatting
-                    $document->date,      // Toegang tot de datum
-                    $document->body(),       // Toegang tot de inhoud/body
-                    $document->slug
-             ))
-             ->sortByDesc('date');
-    });
+        $query->when($filters['category'] ?? false, fn ($query, $category)=>
+            $query->whereHas('category', fn ($query) =>
+                $query ->where('slug', $category)
+            )
+        );
+        $query->when($filters['author'] ?? false, fn ($query, $author)=>
+            $query->whereHas('author', fn ($query) =>
+                $query ->where('username', $author)
+            )
+        );
     }
 
-    public static function find($slug) {
-        return static::all()->firstWhere('slug', $slug);
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    // Relatie tussen Post en Category
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
 
