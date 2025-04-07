@@ -14,7 +14,7 @@ class PostController extends Controller
 
         return view('posts.index', [
             'posts' => Post::latest()->filter(
-                request(['search', 'category'])
+                request(['search', 'category', 'author'])
             )->paginate(6)->withQueryString() // Haalt alle posts op, gesorteerd van nieuwste naar oudste
         ]);
     }
@@ -39,12 +39,13 @@ class PostController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|unique:posts,slug',
             'body' => 'required|string',
-            'prijs' => 'required|numeric|min:0',
+            'prijs' => 'required|integer',
             'category_id' => 'required|exists:categories,id',
         ]);
 
         // Create the post and associate the user_id
         $post = Post::create([
+            'user_id' => auth()->id(), // Get the authenticated user's ID
             'title' => $validatedData['title'],
             'slug' => $validatedData['slug'],
             'body' => $validatedData['body'],
@@ -86,7 +87,17 @@ class PostController extends Controller
 
         return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
     }
+    public function destroy($id)
+    {
+        // Zoek de post op basis van het ID
+        $post = Post::findOrFail($id);
 
+        // Verwijder de post
+        $post->delete();
+
+        // Redirect of response
+        return redirect()->route('posts.index')->with('success', 'Post succesvol verwijderd.');
+    }
 
 
 

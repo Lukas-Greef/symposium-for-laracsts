@@ -102,4 +102,5 @@
             </tbody>
         </table>
     </section>
+
 </x-layout>

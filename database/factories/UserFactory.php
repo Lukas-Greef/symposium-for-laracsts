@@ -17,6 +17,11 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
+     * Static variable to keep track of the user_id.
+     */
+    private static int $userCounter = 1;
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -24,13 +29,24 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake()->unique()->name(),
+            'user_id' => $this->newUserId(),
             'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Method to generate a new user_id incrementally.
+     *
+     * @return int
+     */
+    private function newUserId(): int
+    {
+        return self::$userCounter++;
     }
 
     /**
