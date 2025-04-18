@@ -23,6 +23,7 @@
             </div>
 
             <div class="mt-8 md:mt-0">
+                <a href="{{ route('comment.create') }}" class="mr-4 font-bold text-xs underline">Comment</a>
                 <a href="/register" class="mr-4 font-bold text-xs underline">Register</a>
                 <a href="/" class="text-xs font-bold uppercase underline">Home Page</a>
 

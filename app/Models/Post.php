@@ -8,7 +8,8 @@ use App\Models\Comment;
 class Post extends Model
 {
     use HasFactory;
-
+    protected $table = 'posts';
+    protected $fillable = ['title', 'slug', 'body', 'category_id', 'prijs'];
 
     protected $with = ['category', 'author'];
 

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Post;
+use Illuminate\Support\Facades\Redirect;
 
 class PostController extends Controller
 {
@@ -53,20 +54,20 @@ class PostController extends Controller
             'category_id' => $validatedData['category_id'],
         ]);
 
+
         return redirect()->route('home')->with('success', 'Post created successfully!');
     }
     public function edit(Post $post)
     {
         // Haal de categorieën op om in de dropdown te tonen
         $categories = Category::all();
-
-        // Stuur de post en de categorieën naar de view
         return view('posts.edit', compact('post', 'categories'));
     }
 
 // Voeg de update-methode toe
     public function update(Request $request, Post $post)
     {
+
         // Valideer de request data
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -85,18 +86,13 @@ class PostController extends Controller
             'category_id' => $validatedData['category_id'],
         ]);
 
-        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
+        return redirect()->route('posts.edit', $post)->with('success', 'Post updated successfully!');
     }
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        // Zoek de post op basis van het ID
-        $post = Post::findOrFail($id);
-
-        // Verwijder de post
         $post->delete();
 
-        // Redirect of response
-        return redirect()->route('posts.index')->with('success', 'Post succesvol verwijderd.');
+        return redirect()->back()->with('success', 'Post verwijderd!');
     }
 
 

@@ -1,4 +1,3 @@
-
 <x-layout>
     <section class="max-w-4xl mx-auto px-6 py-8 bg-white rounded shadow-md">
         <h1 class="text-2xl font-bold text-center mb-6">Create a New Post</h1>
@@ -17,6 +16,7 @@
                 <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                 @enderror
             </div>
+
             <label for="prijs" class="block mb-2 uppercase font-bold text-xs text-gray-700">
                 Prijs
             </label>
@@ -48,8 +48,6 @@
             </div>
 
             <!-- Excerpt -->
-
-
             <!-- Category -->
             <div class="mb-6">
                 <label for="category_id" class="block mb-2 uppercase font-bold text-xs text-gray-700">
@@ -73,8 +71,9 @@
         </form>
     </section>
 
+    <!-- Existing Posts Section -->
     <section class="max-w-4xl mx-auto px-6 py-8 bg-white rounded shadow-md mt-8">
-        <h2 class="text-2xl font-bold text-center mb-6">Manage Posts</h2>
+        <h2 class="text-2xl font-bold text-center mb-6">Manage Existing Posts</h2>
 
         <table class="min-w-full bg-white">
             <thead>
@@ -91,6 +90,8 @@
                     <td class="py-3 px-4">{{ $post->category->name }}</td>
                     <td class="py-3 px-4">
                         <a href="{{ route('posts.edit', $post) }}" class="text-blue-500 hover:text-blue-600">Edit</a>
+
+                        <!-- Delete Button -->
                         <form action="{{ route('posts.destroy', $post) }}" method="POST" class="inline-block">
                             @csrf
                             @method('DELETE')
@@ -102,5 +103,4 @@
             </tbody>
         </table>
     </section>
-
 </x-layout>

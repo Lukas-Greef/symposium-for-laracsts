@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostCommentsController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -37,44 +38,58 @@ Route::post('newsletter', function  (){
     return redirect('/');
 
 });
-Route::get('/', [PostController::class, 'index'])->name('home');
+Route::get('/', [PostController::class, 'index'])
+    ->name('home');
 
-Route::get('posts/{post:slug}', [PostController::class, 'show'])->name('post');
+// In web.php
+Route::middleware('auth')->group(function () {
+    Route::get('/comment/create', [CommentController::class, 'create'])
+        ->name('comment.create');
+    Route::post('/comment', [CommentController::class, 'store'])
+        ->name('comment.store');
+});
 
-Route::post('posts/{post:slug}/comments', [PostCommentsController::class, 'store']);
+Route::get('/dashboard', [CommentController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
+
+Route::get('posts/{post:slug}', [PostController::class, 'show'])
+    ->name('post');
 
 Route::get('register', [RegisteredUserController::class, 'create']);
 
 // Route to display the form
-Route::get('admin/posts/make', [PostController::class, 'make'])->name('posts.create');
+Route::get('admin/posts/make', [PostController::class, 'make'])
+    ->name('posts.create');
 
 // Route to handle form submission
-Route::post('admin/posts', [PostController::class, 'store'])->middleware('auth')->name('posts.store');
+Route::post('admin/posts', [PostController::class, 'store'])
+    ->middleware('auth')
+    ->name('posts.store');
 
 // Route to display the edit form for a post
-Route::get('admin/posts/{post}/edit', [PostController::class, 'edit'])->middleware('auth')->name('posts.edit');
+// routes/web.php
 
-// Route to handle the update of a post
-Route::patch('admin/posts/{post}', [PostController::class, 'update'])->middleware('auth')->name('posts.update');
+Route::middleware('auth')->group(function () {
+    Route::get('admin/posts/{post}/edit', [PostController::class, 'edit'])
+        ->name('posts.edit');
+    Route::patch('admin/posts/{post}', [PostController::class, 'update'])
+        ->name('posts.update');
+});
 
 // Route to handle the deletion of a post
-Route::delete('admin/posts/{post}', [PostController::class, 'destroy'])->middleware('auth')->name('posts.destroy');
-
-
-
-
-
-
-// Route voor het dashboard, toegankelijk voor geverifieerde gebruikers
-Route::get('/dashboard', function () {
-    return view('dashboard'); // Weergeeft de 'dashboard' view voor geverifieerde gebruikers
-})->middleware(['auth', 'verified'])->name('dashboard'); // Middleware 'auth' en 'verified' zorgen dat alleen ingelogde en geverifieerde gebruikers toegang hebben
+Route::delete('admin/posts/{post}', [PostController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('posts.destroy');
 
 // Routes die alleen toegankelijk zijn voor ingelogde gebruikers (auth middleware)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit'); // Route voor het bewerken van het profiel
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // Route voor het updaten van het profiel
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Route voor het verwijderen van het profiel
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit'); // Route voor het bewerken van het profiel
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update'); // Route voor het updaten van het profiel
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy'); // Route voor het verwijderen van het profiel
 });
 
 // Inclusie van de routes voor authenticatie (login, registratie, etc.)
